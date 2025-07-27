@@ -1,10 +1,10 @@
 [global]
     keyboard = "en-us"
     country = "de"
-    fqdn = {{FQDN}}
-    mailto = {{EMAIL}}
-    timezone = {{TIMEZONE}}
-    root_password = {{ROOT_PASSWORD}}
+    fqdn = "{{FQDN}}"
+    mailto = "{{EMAIL}}"
+    timezone = "{{TIMEZONE}}"
+    root_password = "{{ROOT_PASSWORD}}"
     reboot_on_error = false
 
 [network]
