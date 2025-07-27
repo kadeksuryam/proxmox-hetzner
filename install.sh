@@ -99,10 +99,10 @@ init() {
 
     log "Preparing template files..."
     mkdir -p ./files
-    curl -fsSLo ./files/99-proxmox.conf https://github.com/kadeksuryam/proxmox-hetzner/raw/refs/heads/main/files/templates/99-proxmox.conf
-    curl -fsSLo ./files/answer.toml https://github.com/kadeksuryam/proxmox-hetzner/raw/refs/heads/main/files/templates/answer.toml
-    curl -fsSLo ./files/hosts https://github.com/kadeksuryam/proxmox-hetzner/raw/refs/heads/main/files/templates/hosts
-    curl -fsSLo ./files/interfaces https://github.com/kadeksuryam/proxmox-hetzner/raw/refs/heads/main/files/templates/interfaces
+    curl -fsSLo ./files/99-proxmox.conf https://github.com/kadeksuryam/proxmox-hetzner/raw/refs/heads/main/templates/99-proxmox.conf
+    curl -fsSLo ./files/answer.toml https://github.com/kadeksuryam/proxmox-hetzner/raw/refs/heads/main/templates/answer.toml
+    curl -fsSLo ./files/hosts https://github.com/kadeksuryam/proxmox-hetzner/raw/refs/heads/main/templates/hosts
+    curl -fsSLo ./files/interfaces https://github.com/kadeksuryam/proxmox-hetzner/raw/refs/heads/main/templates/interfaces
 
     # Update answer.toml
     sed -i "s|{{FQDN}}|$FQDN|g" ./files/answer.toml
