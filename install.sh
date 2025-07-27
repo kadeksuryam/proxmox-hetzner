@@ -105,10 +105,10 @@ init() {
     curl -fsSLo ./files/interfaces https://github.com/kadeksuryam/proxmox-hetzner/raw/refs/heads/main/templates/interfaces
 
     # Update answer.toml
-    sed -i "s|{{FQDN}}|$FQDN|g" ./files/answer.toml
-    sed -i "s|{{EMAIL}}|$EMAIL|g" ./files/answer.toml
-    sed -i "s|{{TIMEZONE}}|$TIMEZONE|g" ./files/answer.toml
-    sed -i "s|{{ROOT_PASSWORD}}|$ROOT_PASSWORD|g" ./files/answer.toml
+    sed -i "s|{{FQDN}}|\"$FQDN\"|g" ./files/answer.toml
+    sed -i "s|{{EMAIL}}|\"$EMAIL\"|g" ./files/answer.toml
+    sed -i "s|{{TIMEZONE}}|\"$TIMEZONE\"|g" ./files/answer.toml
+    sed -i "s|{{ROOT_PASSWORD}}|\"$ROOT_PASSWORD\"|g" ./files/answer.toml
 
     # Update hosts
     sed -i "s|{{HOST_IPV4_ADDR}}|$HOST_IPV4_ADDR|g" ./files/hosts
