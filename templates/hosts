@@ -1,0 +1,5 @@
+127.0.0.1 localhost.localdomain localhost
+{{HOST_IPV4_ADDR}} {{FQDN}} {{HOSTNAME}}
+
+::1     ip6-localhost ip6-loopback
+{{HOST_IPV6_ADDR}} {{FQDN}} {{HOSTNAME}}

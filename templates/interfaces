@@ -1,0 +1,29 @@
+source /etc/network/interfaces.d/*
+
+auto lo
+iface lo inet loopback
+iface lo inet6 loopback
+
+iface {{HOST_INTERFACE}} inet manual
+
+auto vmbr0
+iface vmbr0 inet static
+    address {{HOST_IPV4_ADDR}}
+    netmask 255.255.255.255
+    gateway {{HOST_IPV4_GW}}
+    bridge-ports {{HOST_INTERFACE}}
+    bridge-stp off
+    bridge-vlan-aware yes
+    bridge-vids 2-4094
+    pointopoint {{HOST_IPV4_GW}}
+    up sysctl -p
+
+iface vmbr0 inet6 static
+    address {{HOST_IPV6_ADDR}}
+    netmask 64
+    gateway {{HOST_IPV6_GW}}
+
+auto vmbr1
+iface vmbr1 inet static
+    bridge-ports none
+    bridge-stp off
