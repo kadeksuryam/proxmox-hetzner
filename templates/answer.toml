@@ -1,24 +1,26 @@
 [global]
-    keyboard = "en-us"
-    country = "de"
-    fqdn = {{FQDN}}
-    mailto = {{EMAIL}}
-    timezone = {{TIMEZONE}}
-    root_password = {{ROOT_PASSWORD}}
-    reboot_on_error = false
+keyboard = "en-us"
+country = "de"
+fqdn = "{{FQDN}}"
+mailto = "{{EMAIL}}"
+timezone = "{{TIMEZONE}}"
+root_password = "{{ROOT_PASSWORD}}"
+reboot_on_error = false
 
 [network]
-    source = "from-dhcp"
+source = "from-dhcp"
 
 [disk-setup]
-    filesystem = "zfs"
-    zfs.raid = "raid1"
-    disk_list = ["/dev/vda", "/dev/vdb"]
-    zfs.datasets = [
-        { name = "rpool/ROOT", mountpoint = "/" },
-        { name = "rpool/var", mountpoint = "/var" },
-        { name = "rpool/data", mountpoint = "/rpool/data" }
-    ]
-    zfs.properties = {
-        compression = "lz4", atime = "off", xattr = "sa" 
-    }
+filesystem = "zfs"
+zfs.raid = "raid1"
+disk_list = ["/dev/vda", "/dev/vdb"]
+zfs.datasets = [
+    { name = "rpool/ROOT", mountpoint = "/" },
+    { name = "rpool/var", mountpoint = "/var" },
+    { name = "rpool/data", mountpoint = "/rpool/data" }
+]
+
+[zfs.properties]
+compression = "lz4"
+atime = "off"
+xattr = "sa"
