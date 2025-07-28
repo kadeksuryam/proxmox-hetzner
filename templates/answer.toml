@@ -16,4 +16,4 @@ disk_list = ["/dev/vda", "/dev/vdb"]
 zfs.raid = "raid1"
 zfs.checksum = "fletcher4"
 zfs.compress = "lz4"
-hdsize = 850
+zfs.hdsize = 850
