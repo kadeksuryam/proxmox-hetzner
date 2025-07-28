@@ -12,15 +12,8 @@ source = "from-dhcp"
 
 [disk-setup]
 filesystem = "zfs"
-zfs.raid = "raid1"
 disk_list = ["/dev/vda", "/dev/vdb"]
-zfs.datasets = [
-    { name = "rpool/ROOT", mountpoint = "/" },
-    { name = "rpool/var", mountpoint = "/var" },
-    { name = "rpool/data", mountpoint = "/rpool/data" }
-]
-
-[zfs.properties]
-compression = "lz4"
-atime = "off"
-xattr = "sa"
+zfs.raid = "raid1"
+zfs.checksum = "fletcher4"
+zfs.compress = "lz4"
+hdsize = 850

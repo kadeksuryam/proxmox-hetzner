@@ -1,0 +1,4 @@
+iptables -t raw -A PREROUTING -i vmbr0 -j NOTRACK
+iptables -t raw -A OUTPUT -o vmbr0 -j NOTRACK
+iptables -t raw -A PREROUTING -i vmbr1 -j NOTRACK
+iptables -t raw -A OUTPUT -o vmbr1 -j NOTRACK

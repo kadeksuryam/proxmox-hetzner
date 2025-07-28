@@ -95,7 +95,7 @@ init() {
     echo "deb http://download.proxmox.com/debian/pve bookworm pve-no-subscription" | tee /etc/apt/sources.list.d/pve.list
     curl -fsSL -o /etc/apt/trusted.gpg.d/proxmox-release-bookworm.gpg https://enterprise.proxmox.com/debian/proxmox-release-bookworm.gpg
 
-    apt update && apt install -yq --no-install-recommends proxmox-auto-install-assistant xorriso ovmf wget sshpass
+    apt-get update && apt-get install -yq --no-install-recommends proxmox-auto-install-assistant xorriso ovmf sshpass
 
     log "Preparing template files..."
     mkdir -p ./files
@@ -208,10 +208,30 @@ configure_proxmox() {
 
     ssh-keygen -f "/root/.ssh/known_hosts" -R "[localhost]:2222" || true
 
-    # Explicit destinations
     sshpass -p "$ROOT_PASSWORD" scp -P 2222 -o StrictHostKeyChecking=no files/hosts root@localhost:/etc/hosts
     sshpass -p "$ROOT_PASSWORD" scp -P 2222 -o StrictHostKeyChecking=no files/interfaces root@localhost:/etc/network/interfaces
     sshpass -p "$ROOT_PASSWORD" scp -P 2222 -o StrictHostKeyChecking=no files/99-proxmox.conf root@localhost:/etc/sysctl.d/99-proxmox.conf
+    sshpass -p "$ROOT_PASSWORD" scp -P 2222 -o StrictHostKeyChecking=no files/iptables-rules.v4 root@localhost:/root/rules.v4
+
+    ARC_MIN=$((8 * 1024 * 1024 * 1024))
+    ARC_MAX=$((16 * 1024 * 1024 * 1024))
+
+    sshpass -p "$ROOT_PASSWORD" ssh -p 2222 -o StrictHostKeyChecking=no root@localhost "
+        echo 'Updating packages...'
+        apt update && apt -y upgrade && apt -y autoremove && pveupgrade && pveam update
+
+        echo 'Installing utilities...'
+        apt install -y curl libguestfs-tools unzip iptables-persistent net-tools
+
+        echo 'Updating iptables...'
+        mv /root/rules.v4 /etc/iptables/
+        systemctl restart netfilter-persistent
+
+        echo 'Configuring ZFS...'
+        echo "options zfs zfs_arc_min=${ARC_MIN}" >> /etc/modprobe.d/99-zfs.conf
+        echo "options zfs zfs_arc_max=${ARC_MAX}" >> /etc/modprobe.d/99-zfs.conf
+        update-initramfs -u
+    "
 
     log "Patching Proxmox settings..."
     sshpass -p "$ROOT_PASSWORD" ssh -p 2222 -o StrictHostKeyChecking=no root@localhost "
@@ -233,31 +253,6 @@ configure_proxmox() {
             systemctl restart pveproxy
             echo 'Proxmox GUI restricted to localhost only.'
         fi
-    "
-}
-
-post_install_optimizations() {
-    section "Post-Installation Optimizations"
-
-    ARC_MIN=$((8 * 1024 * 1024 * 1024))
-    ARC_MAX=$((16 * 1024 * 1024 * 1024))
-
-    sshpass -p "$ROOT_PASSWORD" ssh -p 2222 -o StrictHostKeyChecking=no root@localhost "
-        echo 'Updating packages...'
-        apt update && apt -y upgrade && apt -y autoremove && pveupgrade && pveam update
-
-        echo 'Installing useful utilities...'
-        apt install -y curl libguestfs-tools unzip iptables-persistent net-tools
-
-        echo 'Applying nf_conntrack sysctl tweaks...'
-        echo 'nf_conntrack' >> /etc/modules
-        echo 'net.netfilter.nf_conntrack_max=1048576' >> /etc/sysctl.d/99-proxmox.conf
-        echo 'net.netfilter.nf_conntrack_tcp_timeout_established=28800' >> /etc/sysctl.d/99-proxmox.conf
-
-        echo 'Tuning ZFS ARC...'
-        echo "options zfs zfs_arc_min=${ARC_MIN}" >> /etc/modprobe.d/99-zfs.conf
-        echo "options zfs zfs_arc_max=${ARC_MAX}" >> /etc/modprobe.d/99-zfs.conf
-        update-initramfs -u
     "
 }
 
@@ -284,5 +279,4 @@ log "Waiting for installation to complete..."
 boot_proxmox || { error "Failed to boot Proxmox with port forwarding. Exiting."; exit 1; }
 
 configure_proxmox
-post_install_optimizations
 reboot_to_main_os
