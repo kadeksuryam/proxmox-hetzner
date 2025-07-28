@@ -38,18 +38,20 @@ require_root() {
 }
 
 #-----------------------------
-#  Required commands
+#  Auto-install required commands
 #-----------------------------
-require_cmds() {
+ensure_cmds() {
     local missing=()
     for cmd in "$@"; do
         if ! command -v "$cmd" &>/dev/null; then
             missing+=("$cmd")
         fi
     done
+
     if (( ${#missing[@]} )); then
-        error "Missing required commands: ${missing[*]}"
-        exit 1
+        log "Installing missing commands: ${missing[*]}"
+        apt-get update -qq
+        DEBIAN_FRONTEND=noninteractive apt-get install -yq "${missing[@]}"
     fi
 }
 
@@ -73,7 +75,7 @@ fi
 
 init_validation() {
     require_root
-    require_cmds ip curl awk sed qemu-system-x86_64 sshpass nc wget
+    ensure_cmds ip curl awk sed qemu-system-x86_64 sshpass nc wget
 
     : "${HOSTNAME:?HOSTNAME not set in $CONFIG_FILE}"
     : "${FQDN:?FQDN not set in $CONFIG_FILE}"
