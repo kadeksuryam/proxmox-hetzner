@@ -105,6 +105,7 @@ init() {
     cp ./templates/answer.toml ./files/answer.toml 
     cp ./templates/hosts ./files/hosts 
     cp ./templates/interfaces ./files/interfaces
+    cp ./templates/iptables-rules.v4 ./files/iptables-rules.v4
 
     # Update answer.toml
     sed -i "s|{{FQDN}}|\"$FQDN\"|g" ./files/answer.toml
@@ -220,14 +221,19 @@ configure_proxmox() {
 
     sshpass -p "$ROOT_PASSWORD" ssh -p 2222 -o StrictHostKeyChecking=no root@localhost "
         echo 'Updating packages...'
-        apt update && apt -y upgrade && apt -y autoremove && pveupgrade && pveam update
+        apt-get update && apt-get -y upgrade && apt-get -y autoremove && pveupgrade && pveam update
 
         echo 'Installing utilities...'
-        apt install -y curl libguestfs-tools unzip iptables-persistent net-tools
+        echo 'iptables-persistent iptables-persistent/autosave_v4 boolean true' | debconf-set-selections
+        echo 'iptables-persistent iptables-persistent/autosave_v6 boolean true' | debconf-set-selections
+
+        DEBIAN_FRONTEND=noninteractive apt-get install -y curl libguestfs-tools unzip iptables-persistent net-tools
 
         echo 'Updating iptables...'
-        mv /root/rules.v4 /etc/iptables/
-        systemctl restart netfilter-persistent
+        mkdir -p /etc/iptables
+        mv /root/rules.v4 /etc/iptables/rules.v4
+        systemctl enable --now netfilter-persistent
+        netfilter-persistent reload
 
         echo 'Configuring ZFS...'
         echo "options zfs zfs_arc_min=${ARC_MIN}" >> /etc/modprobe.d/99-zfs.conf
@@ -248,12 +254,6 @@ configure_proxmox() {
             sed -Ezi \"s/(Ext.Msg.show\\(\\{\\s+title: gettext\\('No valid sub)/void(\\{ \\/\\/\\1/g\" \
                 /usr/share/javascript/proxmox-widget-toolkit/proxmoxlib.js
             echo 'Subscription popup removed.'
-        fi
-
-        if [ \"${RESTRICT_GUI_TO_LOCALHOST:-true}\" = \"true\" ]; then
-            grep -q '^LISTEN_IP=' /etc/default/pveproxy || echo 'LISTEN_IP=\"127.0.0.1\"' >> /etc/default/pveproxy
-            systemctl restart pveproxy
-            echo 'Proxmox GUI restricted to localhost only.'
         fi
     "
 }
