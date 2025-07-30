@@ -229,6 +229,12 @@ configure_proxmox() {
 
         DEBIAN_FRONTEND=noninteractive apt-get install -y curl libguestfs-tools unzip iptables-persistent net-tools
 
+        echo 'Adding custom DNS servers...'
+        {
+            echo 'nameserver 1.1.1.1'
+            echo 'nameserver 8.8.8.8'
+        } > /etc/resolv.conf
+
         echo 'Updating iptables...'
         mkdir -p /etc/iptables
         mv /root/rules.v4 /etc/iptables/rules.v4
