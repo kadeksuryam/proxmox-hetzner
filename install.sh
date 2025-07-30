@@ -228,10 +228,6 @@ configure_proxmox() {
         echo 'iptables-persistent iptables-persistent/autosave_v6 boolean true' | debconf-set-selections
 
         DEBIAN_FRONTEND=noninteractive apt-get install -y curl libguestfs-tools unzip iptables-persistent net-tools
-        cat <<'EOF' > /etc/resolv.conf
-            nameserver 1.1.1.1
-            nameserver 8.8.8.8
-        EOF
 
         echo 'Updating iptables...'
         mkdir -p /etc/iptables

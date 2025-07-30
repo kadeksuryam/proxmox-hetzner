@@ -1,3 +1,8 @@
+/etc/resolv.conf
+nameserver 1.1.1.1
+nameserver 8.8.8.8
+EOF
+
 parted /dev/nvme0n1
 mkpart special zfs 913GB 963GB
 mkpart l2arc zfs 963GB 1024GB
